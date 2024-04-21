@@ -24,6 +24,7 @@ def main():
     parser.add_argument("query_text", type=str, help="The query text.")
     args = parser.parse_args()
     query_text = args.query_text
+    #query_text = "Have we seen this ip before in any of our reports '203.95.8.98'"
     query_rag(query_text)
 
 

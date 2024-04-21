@@ -36,7 +36,7 @@ def load_documents():
 def split_documents(documents: list[Document]):
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=1000,
-        chunk_overlap=100,
+        chunk_overlap=500,
         length_function=len,
         is_separator_regex=False,
     )
@@ -68,6 +68,7 @@ def add_to_chroma(chunks: list[Document]):
     new_chunks = []
     for chunk in chunks_with_ids:
         if chunk.metadata["id"] not in existing_ids:
+            chunk.page_content = chunk.page_content.replace("[.]", '.') #for ip addresses lol
             new_chunks.append(chunk)
     
     newest_chunks = split_array(new_chunks)
