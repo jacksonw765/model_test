@@ -35,13 +35,20 @@ def load_documents():
 
 def split_documents(documents: list[Document]):
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=800,
-        chunk_overlap=80,
+        chunk_size=1000,
+        chunk_overlap=100,
         length_function=len,
         is_separator_regex=False,
     )
     return text_splitter.split_documents(documents)
 
+def split_array(data, max_size=165):
+    chunks = []
+    
+    for i in range(0, len(data), max_size):
+        chunks.append(data[i:i + max_size])
+    
+    return chunks
 
 def add_to_chroma(chunks: list[Document]):
     # Load the existing database.
@@ -62,14 +69,17 @@ def add_to_chroma(chunks: list[Document]):
     for chunk in chunks_with_ids:
         if chunk.metadata["id"] not in existing_ids:
             new_chunks.append(chunk)
-
-    if len(new_chunks):
-        print(f"👉 Adding new documents: {len(new_chunks)}")
-        new_chunk_ids = [chunk.metadata["id"] for chunk in new_chunks]
-        db.add_documents(new_chunks, ids=new_chunk_ids)
-        db.persist()
-    else:
-        print("✅ No new documents to add")
+    
+    newest_chunks = split_array(new_chunks)
+    print(f"Number of chunked documents to add: {len(new_chunks)}")
+    for max_array_chunk in newest_chunks:
+        if len(max_array_chunk):
+            print(f"👉 Adding new documents: {len(max_array_chunk)}")
+            new_chunk_ids = [chunk.metadata["id"] for chunk in new_chunks]
+            db.add_documents(max_array_chunk, ids=new_chunk_ids)
+            db.persist()
+        else:
+            print("✅ No new documents to add")
 
 
 def calculate_chunk_ids(chunks):
